@@ -1,0 +1,44 @@
+{
+  "name": "RawatEnterprises",
+  "version": "1.0.0",
+  "description": "A simple CAP project.",
+  "repository": "<Add your repository here>",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@sap/cds": "^8",
+    "express": "^4",
+    "@cap-js/hana": "^1",
+    "@sap/xssec": "^4"
+  },
+  "devDependencies": {
+    "@cap-js/cds-types": "^0.8.0",
+    "@cap-js/sqlite": "^1",
+    "@sap/cds-dk": "^8"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "watch-invoicing": "cds watch --open invoicing/webapp/index.html?sap-ui-xx-viewCache=false",
+    "watch-stockmanagement": "cds watch --open stockmanagement/webapp/index.html?sap-ui-xx-viewCache=false",
+    "watch-ratemanagement": "cds watch --open ratemanagement/webapp/index.html?sap-ui-xx-viewCache=false"
+  },
+  "sapux": [
+    "app/invoicing",
+    "app/stockmanagement",
+    "app/ratemanagement"
+  ],
+  "cds": {
+    "sql": {
+      "native_hana_associations": false
+    },
+    "requires": {
+      "[production]": {
+        "db": "hana",
+        "auth": "xsuaa"
+      },
+      "destinations": true,
+      "html5-repo": true,
+      "workzone": true
+    }
+  }
+}

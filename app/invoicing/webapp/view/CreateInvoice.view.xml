@@ -1,0 +1,133 @@
+<mvc:View controllerName="rwt.etp.invoicing.controller.CreateInvoice"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m">
+    		<Page
+            id="page"
+            title="{i18n>title}"
+            showFooter="true">
+			<content>
+				<HBox id="idHeadr" justifyContent="SpaceAround" width="100%" >
+					<!-- First HBox: Left-Aligned -->
+					<HBox id="idCstNm" alignItems="Center" justifyContent="Center" width="33%">
+						<Text id="idTextCst" text="Customer Name : "></Text>
+						<Input id="idCustmrNm" placeholder="Enter customer name"></Input>
+					</HBox>
+				
+					<!-- Second HBox: Center-Aligned -->
+					<HBox id="idCstCnt" alignItems="Center" justifyContent="Center" width="33%">
+						<Text id="idTextPn" text="Phone Number : "></Text>
+						<Input id="idIntPn" placeholder="Enter customer Phone number"></Input>
+					</HBox>
+				
+					<!-- Third HBox: Right-Aligned -->
+					<HBox id="idCstAdr" alignItems="Center" justifyContent="Center" width="33%">
+						<Text id="idTextAdr" text="Address : "></Text>
+						<Input id="idIntAdr" placeholder="Enter customer Address"></Input>
+					</HBox>
+				</HBox>
+				  <core:HTML id="_IDGenHTML1" content="&lt;hr style='width:100%; border:1px solid #ccc; margin:10px 0;' /&gt;" />
+
+				<Table id="idTable" items="{path:'InvoiceModel>/'}" updateFinished="onTblUpdateFinsh" backgroundDesign="Solid" class="sapUiMediumMarginBegin sapUiMediumMarginEnd">
+					<headerToolbar>
+						<OverflowToolbar id="_IDGenOverflowToolbar" >
+							<Input
+                            id="idItemSearch"
+                            width="100%"
+                            placeholder="Search for products..."
+                            showSuggestion="true"
+                            submit="onAddItmPrs"
+                            suggestionItemSelected="onSuggestionItemSelected"
+                            suggestionItems="{
+                            path: '/Products',
+                            templateShareable: false
+                            }">
+								<suggestionItems>
+									<core:Item id="_IDGenItem" text="{Product} {ProductCode}-{Packaging_Qty}{Unit}"  key="{ProductCode}--{Packaging_Qty}"/>
+								</suggestionItems>
+							</Input>
+						</OverflowToolbar>
+					</headerToolbar>
+					<columns>
+						<Column id="_IDGenColumn">
+							<Text width="80%"
+                                id="idTxtPrd"
+                                text="Product"
+                            />
+						</Column>
+						<Column id="_IDGenColumn1" demandPopin="true">
+							<Text
+                                id="idTxtPrdDesc"
+                                text="Description"
+                            />
+						</Column>
+						<Column id="_IDGenColumn2" >
+							<Text id="idQty" text="Packing" ></Text>
+						</Column>
+						<Column id="_IDGenColumn7">
+							<Text
+                                id="idBillQty"
+                                text="Billing Qty"
+                            />
+						</Column>
+						<Column id="_IDGenColumn3">
+							<Text
+                                id="idCP"
+                                text="Cost Price"
+                            />
+						</Column>
+						<Column id="_IDGenColumn4">
+							<Text
+                                id="idSP"
+                                text="Selling Price"
+                            />
+						</Column>
+					
+						
+						<Column id="_IDTotalRateCol">
+							<Text id="_IDTotalRateText" text="Total" />
+						</Column>
+						<Column id="_IDGenColumn8">
+							<Text id="_IDGenText" text="Delete" />
+						</Column>
+						
+					</columns>
+					<items>
+						<ColumnListItem id="_IDGenColumnListItem">
+							<cells>
+								<Text id="_IDGenText1" text="{InvoiceModel>Product}" />
+								<Text id="_IDGenText2" text="{InvoiceModel>ProductCode}" />
+								<Text id="_IDGenText3" text="{InvoiceModel>Packaging_Qty} {InvoiceModel>Unit} "></Text>
+									<StepInput step="1"  id="idStpQty" min="0.5" value="{InvoiceModel>Sell_Qty}" change="updateSP" width="50%" displayValuePrecision="1"></StepInput>
+						
+								<Text id="_IDGenText4" text="{InvoiceModel>Cost_Price}" />
+								<Input id="_IDGenText5" value="{InvoiceModel>Selling_Price}" />
+								<!-- Delete Button -->
+									<Text id="_IdTotalRate" text="{InvoiceModel>TotalPrice}" />
+								
+								<Button id="_IDGenButton" icon="sap-icon://delete" press="onDelRow" type="Transparent" tooltip="Delete Row"/>
+							</cells>
+						</ColumnListItem>
+					</items>
+				</Table>
+			</content>
+			<footer>
+				<OverflowToolbar id="_IDGenOverflowToolbar1">
+				<Button id="_IDResetBtn"
+                        type="Accept"
+                        text="Reset/Clear"
+                        press="onResetPrs"
+                    />
+					<ToolbarSpacer id="_IDGenToolbarSpacer" />
+					<Text id="_IDGenText8" text="Total bill:"></Text>
+					<Text id="idTotlVal" text="" class="--sapFontHeader1Size" ></Text>
+					<Toolbar id="_IDGenToolbar" ></Toolbar>
+					<Button id="_IDGenButton1"
+                        type="Accept"
+                        text="Print"
+                        press="onPrntPrs"
+                    />
+				</OverflowToolbar>
+			</footer>
+    </Page>
+</mvc:View>
