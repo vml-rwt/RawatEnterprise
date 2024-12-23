@@ -17,8 +17,6 @@
     },
     "dataSources": {
       "mainService": {
-
-        
         "uri": "odata/v4/catalog/",
         "type": "OData",
         "settings": {

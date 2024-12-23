@@ -4,9 +4,9 @@ sap.ui.define([
     "sap/ui/model/Filter",
     'sap/ui/export/library',
     'sap/ui/export/Spreadsheet'
-], (Controller,MessageToast,Filter, exportLibrary, Spreadsheet) => {
+], (Controller, MessageToast, Filter, exportLibrary, Spreadsheet) => {
     "use strict";
-
+    var EdmType = exportLibrary.EdmType;
     return Controller.extend("rwt.etp.invoicing.controller.CreateInvoice", {
         onInit: function () {
             this._oView = this.getView();
@@ -16,10 +16,12 @@ sap.ui.define([
             this._ServerModel.bindList("/Products").requestContexts(0, 1000).then(function (aContexts) {
                 // Set the data to the JSONModel
                 let aData = aContexts.map(function (oContext) {
+                    oContext.getObject().Selling_Price = parseInt(oContext.getObject().Selling_Price);
+                    oContext.getObject().Cost_Price = parseInt(oContext.getObject().Cost_Price)
                     return oContext.getObject();
                 });
                 this._ProductData.setData(aData);
-                
+
             }.bind(this)).catch(function (oError) {
                 console.error("Error while fetching from server OData:", oError);
             });
@@ -31,7 +33,7 @@ sap.ui.define([
             if (oSelectedItem) {
 
                 let sSelectedKey = oSelectedItem.getKey().split("--");
-               
+
                 let aData = this._ProductData.getProperty("/");
                 let oSelectedData = aData.find(item => item.ProductCode === sSelectedKey[0] &&
                     item.Packaging_Qty == sSelectedKey[1]);
@@ -51,16 +53,30 @@ sap.ui.define([
                 oEvent.getSource().setValue();
             }
         },
-        updateSP:function(oEvent){
-            let oSource = oEvent.getSource();
-            let oParentBinding = oSource.getParent().getBindingContextPath();
+        updateSP: function (oEvent) {
+            let oSource = oEvent.getSource().getParent();
+            let oParentBinding = oSource.getBindingContextPath();
             let oModel = this.getView().getModel("InvoiceModel");
+
+            let changedSP = oSource.getAggregation("cells")[5].getValue();
+            oModel.setProperty(`${oParentBinding}/Selling_Price`, parseInt(changedSP));
+
+            let SellQty = oSource.getAggregation("cells")[3].getValue();
+            oModel.setProperty(`${oParentBinding}/Sell_Qty`, SellQty);
+
             let SellingPrice = oModel.getProperty(`${oParentBinding}/Selling_Price`);
-             let NewSP = oModel.setProperty(`${oParentBinding}/TotalPrice`,SellingPrice*oSource.getValue());
+            let NewSP = oModel.setProperty(`${oParentBinding}/TotalPrice`, parseInt(SellingPrice) * SellQty);
+
             oModel.refresh(true);
         },
+
+        // onSpChange:function(oEvt){
+        //     let oSrc = oEvt.getSource();
+        //     let oSrcVal = oSrc.getValue();
+        //     this.updateSP();
+        // },
         onTblUpdateFinsh: function (oEvent) {
-            const oTable = oEvent.getSource();
+            const oTable = this.byId("idTable");
             const aItems = oTable.getItems();
 
             let fTotalSellingPrice = 0;
@@ -71,13 +87,13 @@ sap.ui.define([
                 const oContext = oItem.getBindingContext("InvoiceModel");
                 if (oContext) {
                     const fSellingPrice = parseFloat(oContext.getProperty("TotalPrice")) || 0;
-                   
+
                     fTotalSellingPrice += fSellingPrice;
-                   
+
                 }
             });
 
-            this.byId("idTotlVal").setText((fTotalSellingPrice ).toFixed(2));
+            this.byId("idTotlVal").setText((fTotalSellingPrice).toFixed(2));
         },
         onDelRow: function (oEvent) {
             // Get the source of the event (the button) and its binding context
@@ -96,7 +112,7 @@ sap.ui.define([
                 sap.m.MessageToast.show("Row deleted successfully");
             }
         },
-        onResetPrs:function(){
+        onResetPrs: function () {
             this.getView().getModel("InvoiceModel").setData().refresh(true);
         },
         createColumnConfig: function () {
@@ -116,8 +132,8 @@ sap.ui.define([
             });
 
             aCols.push({
-                property: ['Qty', 'Unit'],
-                label: 'Quantity',
+                property: ['Packaging_Qty', 'Unit'],
+                label: 'Packing',
                 type: EdmType.String,
                 width: 10,
                 template: '{0} {1}'
@@ -131,7 +147,21 @@ sap.ui.define([
             });
             aCols.push({
                 label: 'Selling Price (incl. GST)',
-                property: 'Final_Price',
+                property: 'Selling_Price',
+                type: EdmType.Number,
+                scale: 2, // Ensures numbers are formatted with two decimal places
+                width: 15
+            });
+            aCols.push({
+                label: 'Quantity',
+                property: 'Sell_Qty',
+                type: EdmType.Number,
+                scale: 2, // Ensures numbers are formatted with two decimal places
+                width: 15
+            });
+            aCols.push({
+                label: 'Total',
+                property: 'TotalPrice',
                 type: EdmType.Number,
                 scale: 2, // Ensures numbers are formatted with two decimal places
                 width: 15
@@ -153,12 +183,6 @@ sap.ui.define([
             let oModel = oTable.getModel("InvoiceModel");
             let aData = oModel.getProperty("/");
 
-            let aProcessedData = aData.map(item => {
-                let fSellingPrice = parseFloat(item.Selling_Price) || 0;
-                let fGST = fSellingPrice * 0.18; // Calculate GST (18%)
-                item.Final_Price = (fSellingPrice + fGST).toFixed(2); // Include GST
-                return item;
-            });
 
             // Extract day, month, and year components
             const day = String(currentDate.getDate()).padStart(2, '0'); // Ensures 2 digits

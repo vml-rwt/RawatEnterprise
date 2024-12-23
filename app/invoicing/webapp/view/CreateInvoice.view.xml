@@ -98,10 +98,10 @@
 								<Text id="_IDGenText1" text="{InvoiceModel>Product}" />
 								<Text id="_IDGenText2" text="{InvoiceModel>ProductCode}" />
 								<Text id="_IDGenText3" text="{InvoiceModel>Packaging_Qty} {InvoiceModel>Unit} "></Text>
-									<StepInput step="1"  id="idStpQty" min="0.5" value="{InvoiceModel>Sell_Qty}" change="updateSP" width="50%" displayValuePrecision="1"></StepInput>
+								<StepInput step="1"  id="idStpQty" min="0.5" value="{InvoiceModel>Sell_Qty}" change="updateSP" width="50%" displayValuePrecision="1"></StepInput>
 						
 								<Text id="_IDGenText4" text="{InvoiceModel>Cost_Price}" />
-								<Input id="_IDGenText5" value="{InvoiceModel>Selling_Price}" />
+								<Input id="_IDGenText5" value="{InvoiceModel>Selling_Price}" liveChange="updateSP"/>
 								<!-- Delete Button -->
 									<Text id="_IdTotalRate" text="{InvoiceModel>TotalPrice}" />
 								
