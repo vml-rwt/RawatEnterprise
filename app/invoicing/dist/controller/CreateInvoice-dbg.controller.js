@@ -12,12 +12,15 @@ sap.ui.define([
             this._oView = this.getView();
             this._ProductData = this.getOwnerComponent().getModel("ProductModel");
             this._ServerModel = this.getOwnerComponent().getModel();
+            this._ProductData.setSizeLimit(1000);
+            this._ServerModel.setSizeLimit(1000);
 
             this._ServerModel.bindList("/Products").requestContexts(0, 1000).then(function (aContexts) {
                 // Set the data to the JSONModel
                 let aData = aContexts.map(function (oContext) {
                     oContext.getObject().Selling_Price = parseInt(oContext.getObject().Selling_Price);
-                    oContext.getObject().Cost_Price = parseInt(oContext.getObject().Cost_Price)
+                    oContext.getObject().Cost_Price = parseInt(oContext.getObject().Cost_Price);
+                    oContext.getObject().Available_Qty = parseInt(oContext.getObject().Available_Qty);
                     return oContext.getObject();
                 });
                 this._ProductData.setData(aData);
@@ -70,11 +73,6 @@ sap.ui.define([
             oModel.refresh(true);
         },
 
-        // onSpChange:function(oEvt){
-        //     let oSrc = oEvt.getSource();
-        //     let oSrcVal = oSrc.getValue();
-        //     this.updateSP();
-        // },
         onTblUpdateFinsh: function (oEvent) {
             const oTable = this.byId("idTable");
             const aItems = oTable.getItems();
@@ -166,8 +164,6 @@ sap.ui.define([
                 scale: 2, // Ensures numbers are formatted with two decimal places
                 width: 15
             });
-
-
             return aCols;
         },
         onPrntPrs: function () {

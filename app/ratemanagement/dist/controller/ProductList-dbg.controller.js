@@ -1,14 +1,19 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/m/MessageToast",
-    "sap/ui/core/Fragment"
-], (Controller,MessageToast,Fragment) => {
+    "sap/ui/core/Fragment",
+    'sap/ui/export/library',
+    'sap/ui/export/Spreadsheet',
+    'sap/m/MessageBox',
+], (Controller,MessageToast,Fragment,exportLibrary, Spreadsheet,MessageBox) => {
     "use strict";
-
+    var EdmType = exportLibrary.EdmType;
     return Controller.extend("rwt.etp.ratemanagement.controller.ProductList", {
         onInit() {
             this._oView = this.getView();
             this._ServerModel = this.getOwnerComponent().getModel();
+            this._ServerModel.setSizeLimit(1000);
+            
         },
 
         onAddNewPrs:function(){
@@ -41,6 +46,7 @@ sap.ui.define([
             var fCostPrice = this.byId("costPriceInput").getValue();
             var fLandingPrice = this.byId("landingPriceInput").getValue();
             var fSellingPrice = this.byId("sellingPriceInput").getValue();
+            var nStock  = this.byId("stockInput").getValue();
 
             // Data structure for new row (to be sent to OData service)
             var oNewRowData = {
@@ -50,7 +56,8 @@ sap.ui.define([
                 Unit: sUnit,
                 Cost_Price: fCostPrice,
                 Landing_Price: fLandingPrice,
-                Selling_Price: fSellingPrice
+                Selling_Price: fSellingPrice,
+                Available_Qty: nStock
             };
 
             var oTable = this.byId("idTable");
@@ -75,7 +82,7 @@ sap.ui.define([
             this.byId("newRowDialog").close();
         },
         onRowEdit:function(oEvent){
-            var oRow = oEvent.getSource().getParent();
+            var oRow = oEvent.getSource().getParent().getParent();
             
             // Access all cells in the row
             var aCells = oRow.getCells();
@@ -95,8 +102,8 @@ sap.ui.define([
         },
         onRowSave: function (oEvent) {
             // Get the clicked button's parent (the ColumnListItem)
-            var oRow = oEvent.getSource().getParent();
-
+            var oRow = oEvent.getSource().getParent().getParent();
+            var _this =this;
             // Access all cells in the row
             var aCells = oRow.getCells();
 
@@ -116,37 +123,134 @@ sap.ui.define([
             var oContext = oRow.getBindingContext(); // Get row's binding context
             this._ServerModel.submitBatch("updateGroup").then(function () {
                 MessageToast.show("Changes saved successfully!");
+                _this._ServerModel.refresh(true);
             }).catch(function (oError) {
                 MessageToast.show("Failed to save changes.");
                 console.error(oError);
             });
         },
 
-        onSavePrs: function () {
-            // This method saves all table data, if needed
-            var oModel = this.getView().getModel();
-            var aData = oModel.getProperty("/Products");
-
-            // Perform save logic (e.g., backend call)
-            MessageToast.show("All changes saved!");
-        },
-        onDelRow: function (oEvent) {
-            // Get the source of the event (the button) and its binding context
-            const oButton = oEvent.getSource();
-            const oContext = oButton.getBindingContext("InvoiceModel");
-
-            if (oContext) {
-                const sPath = oContext.getPath();
-                const oModel = this.getView().getModel("InvoiceModel");
-                const aData = oModel.getProperty("/");
-                const iIndex = parseInt(sPath.split("/").pop());
-                // Remove the item from the array
-                aData.splice(iIndex, 1);
-                // Update the model with the modified data
-                oModel.setProperty("/", aData);
-                sap.m.MessageToast.show("Row deleted successfully");
-            }
+        onRowDel:function(oEvt){
+            var oRow = oEvt.getSource().getParent();
+            var oContext = oRow.getBindingContext(); // Get row's; // Get the binding context
+            // Confirm deletion
+            var _this = this;
+            MessageBox.confirm("Are you sure you want to delete this item?", {
+                onClose: function (oAction) {
+                    if (oAction === MessageBox.Action.OK) {
+                        // Perform delete operation
+                        _this._ServerModel.delete(oContext.getPath())
+                            .then(function () {
+                                sap.m.MessageToast.show("Item deleted successfully.");
+                            })
+                            .catch(function (oError) {
+                                MessageBox.error("Failed to delete item: " + oError.message);
+                            });
+                    }
+                }
+            });
         },
 
+        createColumnConfig: function () {
+            var aCols = [];
+
+            aCols.push({
+                label: 'Product',
+                property: 'Product',
+                type: EdmType.String,
+                width: 50
+            });
+
+            aCols.push({
+                label: 'Product Code',
+                type: EdmType.String,
+                property: 'ProductCode'
+            });
+
+            aCols.push({
+                property: 'Packaging_Qty',
+                label: 'Packaging Quantity',
+                type: EdmType.String
+            });
+            aCols.push({
+                label: 'Unit',
+                property: 'Unit',
+                type: EdmType.Number
+            });
+
+            aCols.push({
+                label: 'Cost Price',
+                property: 'Cost_Price',
+                type: EdmType.Number,
+                width: 15
+            });
+            
+            aCols.push({
+                label: 'Landing Price',
+                property: 'Landing_Price',
+                type: EdmType.Number,
+                scale: 2, // Ensures numbers are formatted with two decimal places
+                width: 15
+            });
+            aCols.push({
+                label: 'Selling Price',
+                property: 'Selling_Price',
+                type: EdmType.Number,
+                scale: 2, // Ensures numbers are formatted with two decimal places
+                width: 15
+            });
+            aCols.push({
+                label: 'Available Stock',
+                property: 'Available_Qty',
+                type: EdmType.Number,
+                scale: 2, // Ensures numbers are formatted with two decimal places
+                width: 15
+            });
+        
+            return aCols;
+        },
+        onDwnldPrs: function () {
+            let FileName = "RateList";
+            const currentDate = new Date();
+
+            let oTable = this.byId("idTable");
+            
+            // Extract day, month, and year components
+            const day = String(currentDate.getDate()).padStart(2, '0'); // Ensures 2 digits
+            const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+            const year = String(currentDate.getFullYear()).slice(-2); // Extract last 2 digits of the year
+
+            // Combine into DDMMYY format
+            const formattedDate = `${day}${month}${year}`;
+            FileName += "_" + formattedDate;
+
+            var aCols, oRowBinding, oSettings, oSheet;
+
+            oRowBinding = oTable.getBinding('items');
+            aCols = this.createColumnConfig();
+
+            oSettings = {
+                workbook: {
+                    context: {
+                        application: "Rate List",
+                        version: "6.1.0-SNAPSHOT",
+                        title: "Rate List",
+                        modifiedBy: "Rawat, Enterprises",
+                        sheetName: "RateList"
+                    },
+                    columns: aCols,
+                    hierarchyLevel: 'Level'
+                },
+
+                dataSource: oRowBinding,
+                fileName: FileName + '.xlsx',
+                worker: false // We need to disable worker because we are using a MockServer as OData Service
+            };
+
+            oSheet = new Spreadsheet(oSettings);
+            oSheet.build().finally(function () {
+                oSheet.destroy();
+            });
+        }
     });
 });

@@ -22,7 +22,7 @@
 			singleContainerFullSize="false" backgroundDesign="Solid">
 			<f:content>
 				 <!-- Product Code -->
-                <Label text="Product Code" />
+                <Label  text="Product Code" />
                 <Input id="productCodeInput" placeholder="Enter Product Code" />
 
                 <!-- Product Name -->
@@ -48,6 +48,9 @@
                 <!-- Selling Price -->
                 <Label text="Selling Price" />
                 <Input id="sellingPriceInput" type="Number" placeholder="Enter Selling Price" />
+
+                <Label text="Availble Stock" />
+                <Input id="stockInput" type="Number" placeholder="Enter Available Stock" />
 			</f:content>
 		</f:SimpleForm>
         </content>
