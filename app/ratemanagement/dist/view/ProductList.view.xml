@@ -64,7 +64,7 @@
 								<Input editable="false" id="_IDLandingCost" value="{Landing_Price}" />
 								<Input editable="false" id="_IDGenText5" value="{Selling_Price}" />
 								<Input editable="false" id="_IDGenText6" value="{Available_Qty}" />
-								<HBox >
+								<HBox id="_IDGenHBox" >
 									<Button id="_IDGenButton" icon="sap-icon://edit" press="onRowEdit" type="Transparent" tooltip="Edit Row"/>
 							<Button id="_IDDelBtn" icon="sap-icon://delete" press="onRowDel" type="Transparent" tooltip="Edit Row"/>
 						

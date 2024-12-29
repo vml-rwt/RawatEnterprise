@@ -200,7 +200,7 @@ sap.ui.define([
                         application: "Supplier Invoices List",
                         version: "6.1.0-SNAPSHOT",
                         title: "Supplier Invoices",
-                        modifiedBy: "Doe, John",
+                        modifiedBy: "Rawat Enterprises",
                         sheetName: "Invoices"
                     },
                     columns: aCols,

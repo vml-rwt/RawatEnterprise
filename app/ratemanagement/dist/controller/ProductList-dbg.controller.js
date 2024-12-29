@@ -123,7 +123,7 @@ sap.ui.define([
             var oContext = oRow.getBindingContext(); // Get row's binding context
             this._ServerModel.submitBatch("updateGroup").then(function () {
                 MessageToast.show("Changes saved successfully!");
-                _this._ServerModel.refresh(true);
+                _this._ServerModel.refresh();
             }).catch(function (oError) {
                 MessageToast.show("Failed to save changes.");
                 console.error(oError);
