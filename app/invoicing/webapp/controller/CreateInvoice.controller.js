@@ -15,7 +15,8 @@ sap.ui.define([
             this._ProductData.setSizeLimit(1000);
             this._ServerModel.setSizeLimit(1000);
 
-            this._ServerModel.bindList("/Products").requestContexts(0, 1000).then(function (aContexts) {
+            this._ProdctsCtx = this._ServerModel.bindList("/Products");
+            this._ProdctsCtx.requestContexts(0, 1000).then(function (aContexts) {
                 // Set the data to the JSONModel
                 let aData = aContexts.map(function (oContext) {
                     oContext.getObject().Selling_Price = parseInt(oContext.getObject().Selling_Price);
@@ -94,18 +95,14 @@ sap.ui.define([
             this.byId("idTotlVal").setText((fTotalSellingPrice).toFixed(2));
         },
         onDelRow: function (oEvent) {
-            // Get the source of the event (the button) and its binding context
             const oButton = oEvent.getSource();
             const oContext = oButton.getBindingContext("InvoiceModel");
-
             if (oContext) {
                 const sPath = oContext.getPath();
                 const oModel = this.getView().getModel("InvoiceModel");
                 const aData = oModel.getProperty("/");
                 const iIndex = parseInt(sPath.split("/").pop());
-                // Remove the item from the array
                 aData.splice(iIndex, 1);
-                // Update the model with the modified data
                 oModel.setProperty("/", aData);
                 sap.m.MessageToast.show("Row deleted successfully");
             }
@@ -113,6 +110,50 @@ sap.ui.define([
         onResetPrs: function () {
             this.getView().getModel("InvoiceModel").setData().refresh(true);
         },
+        onSaveInvoice: async function () {
+            debugger;
+            const aInvoiceItems = this.getView().getModel("InvoiceModel").getProperty("/");
+            const oModel = this._ServerModel;
+        
+            const sUpdateGroupId = "invoiceStockUpdate";
+        
+            for (const item of aInvoiceItems) {
+                const sProductCode = item.ProductCode;
+                const iPackagingQty = item.Packaging_Qty;
+        
+                const sPath = `/Products(ProductCode='${sProductCode}',Packaging_Qty=${iPackagingQty})`;
+        
+                const oBinding = oModel.bindContext(sPath, null, {
+                    $$updateGroupId: sUpdateGroupId
+                });
+        
+                try {
+            
+                        const newStock = item.Available_Qty - item.Sell_Qty;
+        
+                    if (newStock < 0) {
+                        sap.m.MessageBox.error(`Not enough stock for ${item.Product}`);
+                        continue;
+                    }
+        
+                    const oContext = oBinding.getBoundContext(); // writable context
+                    oContext.setProperty("Available_Qty", newStock);
+        
+                } catch (err) {
+                    console.error(`Error processing ${item.Product}:`, err);
+                    sap.m.MessageBox.error(`Error processing ${item.Product}: ${err.message}`);
+                }
+            }
+        
+            try {
+                await oModel.submitBatch(sUpdateGroupId);
+                sap.m.MessageToast.show("Invoice saved and stock updated!");
+            } catch (err) {
+                console.error("Batch submission failed:", err);
+                sap.m.MessageToast.show("Failed to update stock.");
+            }
+        }
+        ,          
         createColumnConfig: function () {
             var aCols = [];
 
@@ -166,9 +207,10 @@ sap.ui.define([
             });
             return aCols;
         },
-        onPrntPrs: function () {
+        onPrntPrs:function(){
             let FileName = this.byId("idCustmrNm").getValue();
 
+            this.onSaveInvoice();
             if (!FileName) {
                 MessageToast.show("Enter Customer Name");
                 return;

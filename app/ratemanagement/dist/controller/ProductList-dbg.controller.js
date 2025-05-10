@@ -37,6 +37,7 @@ sap.ui.define([
         // Triggered when the "Save" button in the dialog is pressed
         onSaveNewRow: function () {
             var oView = this.getView();
+            var _this= this;
 
             // Get input values from the fragment
             var sProductCode = this.byId("productCodeInput").getValue();
@@ -68,6 +69,7 @@ sap.ui.define([
             oContext.created().then(function () {
                MessageToast.show("New Product Added");
                oView.byId("newRowDialog").close();
+               _this._ServerModel.refresh();
             }, function (oError) {
                 // handle rejection of entity creation; if oError.canceled === true then the transient entity has been deleted
                     if (!oError.canceled) {
@@ -132,13 +134,13 @@ sap.ui.define([
 
         onRowDel:function(oEvt){
             var oRow = oEvt.getSource().getParent();
-            var oContext = oRow.getBindingContext(); // Get row's; // Get the binding context
-            // Confirm deletion
+            var oContext = oRow.getBindingContext(); 
+        
             var _this = this;
             MessageBox.confirm("Are you sure you want to delete this item?", {
                 onClose: function (oAction) {
                     if (oAction === MessageBox.Action.OK) {
-                        // Perform delete operation
+                        
                         _this._ServerModel.delete(oContext.getPath())
                             .then(function () {
                                 sap.m.MessageToast.show("Item deleted successfully.");
@@ -170,7 +172,7 @@ sap.ui.define([
             aCols.push({
                 property: 'Packaging_Qty',
                 label: 'Packaging Quantity',
-                type: EdmType.String
+                type: EdmType.Number
             });
             aCols.push({
                 label: 'Unit',
@@ -189,21 +191,21 @@ sap.ui.define([
                 label: 'Landing Price',
                 property: 'Landing_Price',
                 type: EdmType.Number,
-                scale: 2, // Ensures numbers are formatted with two decimal places
+                scale: 2, 
                 width: 15
             });
             aCols.push({
                 label: 'Selling Price',
                 property: 'Selling_Price',
                 type: EdmType.Number,
-                scale: 2, // Ensures numbers are formatted with two decimal places
+                scale: 2,
                 width: 15
             });
             aCols.push({
                 label: 'Available Stock',
                 property: 'Available_Qty',
                 type: EdmType.Number,
-                scale: 2, // Ensures numbers are formatted with two decimal places
+                scale: 2, 
                 width: 15
             });
         
