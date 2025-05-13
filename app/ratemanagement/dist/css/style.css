@@ -1,1 +1,4 @@
 /* Enter your custom styles here */
+tr[data-qty="LOW"] {
+    background-color: #ffff9c(245, 68, 68, 0.644);
+  }

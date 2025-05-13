@@ -1,6 +1,6 @@
 <mvc:View controllerName="rwt.etp.ratemanagement.controller.ProductList"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m">
+    xmlns="sap.m" xmlns:core="sap.ui.core">
     <Page id="page" title="{i18n>title}">
 	<content>
     <Table id="idTable" sticky="ColumnHeaders" items="{ 
@@ -56,8 +56,13 @@
 					</columns>
 					<items>
 						<ColumnListItem id="_IDGenColumnListItem">
+						<customData>
+      					<core:CustomData key="QTY" value="{= ${Available_Qty} &lt; 2 ? 'LOW' : (${Available_Qty} &gt;= 2 &amp;&amp; ${Available_Qty} &lt; 4) ? 'WARN' : 'OK'}"
+  writeToDom="true" />
+     					 </customData>
+
 							<cells>
-								<Text id="_IDGenText1" text="{Product}" />
+								<Text id="_IDGenText1"  text="{Product}" />
 								<Text id="_IDGenText2" text="{ProductCode}" />
 								<Text id="_IDGenText3" text="{Packaging_Qty} {Unit} "></Text>
 								<Input editable="false" id="_IDGenText4" value="{Cost_Price}" />
