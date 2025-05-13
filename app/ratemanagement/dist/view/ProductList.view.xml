@@ -57,11 +57,12 @@
 					<items>
 						<ColumnListItem id="_IDGenColumnListItem">
 						<customData>
-      					  <core:CustomData id="idCustomAtt" key="QTY" value="{= ${Available_Qty} &lt; 2 ? 'LOW' : 'OK' }" writeToDom="true" />
+      					<core:CustomData key="QTY" value="{= ${Available_Qty} &lt; 2 ? 'LOW' : (${Available_Qty} &gt;= 2 &amp;&amp; ${Available_Qty} &lt; 4) ? 'WARN' : 'OK'}"
+  writeToDom="true" />
      					 </customData>
 
 							<cells>
-								<Text id="_IDGenText1" text="{Product}" />
+								<Text id="_IDGenText1"  text="{Product}" />
 								<Text id="_IDGenText2" text="{ProductCode}" />
 								<Text id="_IDGenText3" text="{Packaging_Qty} {Unit} "></Text>
 								<Input editable="false" id="_IDGenText4" value="{Cost_Price}" />

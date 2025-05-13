@@ -1,4 +1,8 @@
 /* Enter your custom styles here */
 tr[data-qty="LOW"] {
-    background-color: #ffff9c(245, 68, 68, 0.644);
+    background-color: #ff5e00;
+  }
+
+  tr[data-qty="WARN"] {
+    background-color: #ffc800;
   }

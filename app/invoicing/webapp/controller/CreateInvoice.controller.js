@@ -120,8 +120,9 @@ sap.ui.define([
             for (const item of aInvoiceItems) {
                 const sProductCode = item.ProductCode;
                 const iPackagingQty = item.Packaging_Qty;
-        
-                const sPath = `/Products(ProductCode='${sProductCode}',Packaging_Qty=${iPackagingQty})`;
+                
+                const sEncodedCode = `'${encodeURIComponent(sProductCode)}'`; 
+                const sPath = `/Products(ProductCode=${sEncodedCode},Packaging_Qty=${iPackagingQty})`;
         
                 const oBinding = oModel.bindContext(sPath, null, {
                     $$updateGroupId: sUpdateGroupId
@@ -130,7 +131,6 @@ sap.ui.define([
                 try {
             
                         const newStock = item.Available_Qty - item.Sell_Qty;
-        
                     if (newStock < 0) {
                         sap.m.MessageBox.error(`Not enough stock for ${item.Product}`);
                         continue;
